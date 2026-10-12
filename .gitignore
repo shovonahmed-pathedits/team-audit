@@ -1,0 +1,68 @@
+# ==========================================
+# Security & Credentials (STRICT - DO NOT REMOVE)
+# ==========================================
+credentials.json
+**/credentials.json
+note.txt
+**/note.txt
+*token*.json
+**/google_token.json
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pub
+*.pfx
+*.p12
+
+# ==========================================
+# Python & Bytecode
+# ==========================================
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# ==========================================
+# Virtual Environments
+# ==========================================
+venv/
+.venv/
+env/
+ENV/
+
+# ==========================================
+# Build Artifacts & Packaging
+# ==========================================
+build/
+dist/
+*.egg-info/
+*.egg
+*.spec
+*.manifest
+
+# ==========================================
+# Logs & Temporary Files
+# ==========================================
+*.log
+logs/
+**/logs/
+debug_last_page.html
+**/debug_last_page.html
+scraper_gui/output/
+**/output/
+
+# ==========================================
+# IDE & Operating System
+# ==========================================
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini
+nul

@@ -1,0 +1,4 @@
+PySide6==6.7.2
+beautifulsoup4==4.12.3
+keyring==25.0.0
+pywin32==306

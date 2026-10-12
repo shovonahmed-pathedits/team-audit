@@ -1,0 +1,28 @@
+# Build artifacts
+dist/
+build/
+*.spec
+
+# Python & Linter cache
+__pycache__/
+*.py[cod]
+*$py.class
+.ruff_cache/
+.pytest_cache/
+
+# Virtual Environment
+venv/
+.env
+.venv/
+
+# Runtime & Sample Data
+data/
+sessions/
+logs/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+

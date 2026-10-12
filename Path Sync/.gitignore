@@ -1,0 +1,92 @@
+# Security & Credentials
+.env
+.env.*
+!.env.example
+credentials.json
+*.pem
+*.key
+*.pub
+
+# Project Specific & Scratch Notes
+\#note/
+\##UI/
+old app/
+processes.txt
+git_*.txt
+
+# Python Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+
+# Python build artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Scraper Output & Logs
+scraper_gui/output/
+logs/
+*.log
+
+# AI / Tool Specific
+.kilo/
+.qwen/
+.ruff_cache/
+.ipynb_checkpoints
+
+# OS Specific
+.DS_Store
+Thumbs.db
+desktop.ini
+nul
+
+# Local Settings
+.vscode/
+.idea/
+.project
+.pydevproject
+.settings/

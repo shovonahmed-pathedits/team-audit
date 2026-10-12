@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Google Sans', Arial, sans-serif; }
+    body { background: #f8f9fa; padding: 16px; font-size: 13px; color: #202124; }
+
+    .header { color: white; border-radius: 10px; padding: 16px; margin-bottom: 16px; text-align: center; background: linear-gradient(135deg, #1a73e8, #0d47a1); }
+    .header h2 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+    .header p  { font-size: 11px; opacity: 0.85; }
+
+    .mode-badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 10px; border-radius: 99px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; background: rgba(255,255,255,0.25); color: white; }
+
+    .input-box { background: white; border: 1px solid #dadce0; border-radius: 8px; padding: 12px; margin-bottom: 14px; }
+    .input-box label { font-size: 11px; font-weight: 600; color: #5f6368; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px; }
+    .input-box textarea { width: 100%; border: 1px solid #dadce0; border-radius: 6px; padding: 8px 10px; font-size: 12px; color: #202124; outline: none; resize: none; height: 52px; transition: border 0.2s; font-family: monospace; }
+    .input-box textarea:focus { border-color: #1a73e8; }
+    .hint { font-size: 10px; color: #5f6368; margin-top: 5px; background: #f1f3f4; border-radius: 4px; padding: 5px 8px; }
+
+    .source-info { border: 1px solid #c5d8f6; border-radius: 8px; padding: 10px 12px; margin-bottom: 14px; font-size: 10px; word-break: break-all; background: #e8f0fe; color: #1a73e8; }
+    .source-info strong { display: block; font-size: 10px; color: #5f6368; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+
+    .btn { width: 100%; padding: 11px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px; }
+    .btn-purple  { background: #7c3aed; color: white; } .btn-purple:hover  { background: #6d28d9; }
+    .btn-clear   { background: white; color: #5f6368; border: 1px solid #dadce0; } .btn-clear:hover { background: #f1f3f4; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-spinner { display: none; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.4); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .progress-wrap { display: none; background: white; border: 1px solid #dadce0; border-radius: 8px; padding: 14px; margin-bottom: 14px; }
+    .progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .progress-label { font-size: 12px; font-weight: 600; color: #202124; }
+    .progress-pct   { font-size: 12px; font-weight: 700; color: #7c3aed; }
+    .progress-bar-bg { background: #f1f3f4; border-radius: 99px; height: 10px; overflow: hidden; margin-bottom: 8px; }
+    .progress-bar-fill { height: 100%; border-radius: 99px; width: 0%; background: linear-gradient(90deg, #7c3aed, #1a73e8); transition: width 0.4s ease; }
+    .progress-status { font-size: 11px; color: #5f6368; text-align: center; min-height: 16px; }
+
+    .result-box { display: none; background: white; border: 1px solid #dadce0; border-radius: 8px; padding: 12px; margin-bottom: 14px; }
+    .result-title { font-size: 12px; font-weight: 600; color: #202124; margin-bottom: 10px; }
+    .stats { display: flex; gap: 8px; margin-bottom: 12px; }
+    .stat { flex: 1; text-align: center; padding: 8px 4px; border-radius: 6px; }
+    .stat-green { background: #e6f4ea; } .stat-yellow { background: #fef7e0; } .stat-red { background: #fce8e6; }
+    .stat-num   { font-size: 20px; font-weight: 700; }
+    .stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.3px; }
+    .stat-green  .stat-num, .stat-green  .stat-label { color: #137333; }
+    .stat-yellow .stat-num, .stat-yellow .stat-label { color: #b06000; }
+    .stat-red    .stat-num, .stat-red    .stat-label { color: #c5221f; }
+
+    .url-box { display: none; background: white; border: 1px solid #dadce0; border-radius: 8px; padding: 12px; margin-bottom: 14px; }
+    .url-box-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+    .url-box-title  { font-size: 12px; font-weight: 600; color: #202124; }
+    .url-summary    { display: flex; gap: 8px; margin-bottom: 10px; }
+    .url-sum-pill   { font-size: 10px; font-weight: 600; padding: 3px 10px; border-radius: 99px; }
+    .url-sum-found  { background: #e6f4ea; color: #137333; }
+    .url-sum-miss   { background: #fce8e6; color: #c5221f; }
+
+    .copy-all-btn { background: #1a73e8; color: white; border: none; border-radius: 6px; padding: 5px 12px; font-size: 11px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    .copy-all-btn:hover { background: #1557b0; }
+    .copy-all-btn.copied { background: #34a853; }
+
+    .url-list { display: flex; flex-direction: column; gap: 5px; max-height: 340px; overflow-y: auto; }
+    .url-row { display: flex; align-items: center; gap: 8px; border-radius: 6px; padding: 7px 10px; }
+    .url-row.found   { background: #f8f9fa; border: 0.5px solid #dadce0; }
+    .url-row.missing { background: #fce8e6; border: 0.5px solid #f5c6c6; }
+    .url-num { border-radius: 50%; width: 20px; height: 20px; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .url-row.found   .url-num { background: #1a73e8; color: white; }
+    .url-row.missing .url-num { background: #ea4335; color: white; }
+    .url-info { flex: 1; min-width: 0; }
+    .url-name { font-size: 11px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .url-row.found   .url-name { color: #202124; }
+    .url-row.missing .url-name { color: #c5221f; }
+    .url-link { font-size: 10px; color: #1a73e8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+    .not-found-tag { font-size: 9px; font-weight: 700; background: #ea4335; color: white; padding: 2px 7px; border-radius: 99px; flex-shrink: 0; }
+    .copy-one-btn { background: white; color: #1a73e8; border: 1px solid #1a73e8; border-radius: 5px; padding: 3px 8px; font-size: 10px; font-weight: 600; cursor: pointer; flex-shrink: 0; transition: all 0.15s; }
+    .copy-one-btn:hover { background: #e8f0fe; }
+    .copy-one-btn.copied { background: #34a853; color: white; border-color: #34a853; }
+
+    .popup-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.45); z-index: 1000; align-items: center; justify-content: center; }
+    .popup-overlay.show { display: flex; animation: fadeIn 0.25s ease; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .popup-box { background: white; border-radius: 14px; padding: 28px 24px; text-align: center; max-width: 260px; width: 90%; animation: popIn 0.3s cubic-bezier(0.175,0.885,0.32,1.275); }
+    @keyframes popIn { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .popup-icon  { font-size: 44px; margin-bottom: 12px; }
+    .popup-title { font-size: 16px; font-weight: 700; color: #202124; margin-bottom: 8px; }
+    .popup-msg   { font-size: 12px; color: #5f6368; line-height: 1.6; margin-bottom: 18px; }
+    .popup-stats { display: flex; gap: 10px; justify-content: center; margin-bottom: 18px; }
+    .popup-stat  { text-align: center; }
+    .popup-stat-num   { font-size: 22px; font-weight: 700; }
+    .popup-stat-label { font-size: 10px; color: #5f6368; text-transform: uppercase; }
+    .popup-stat.green .popup-stat-num { color: #137333; }
+    .popup-stat.amber .popup-stat-num { color: #b06000; }
+    .popup-stat.red   .popup-stat-num { color: #c5221f; }
+    .popup-ok { background: #1a73e8; color: white; border: none; border-radius: 8px; padding: 10px 32px; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .popup-ok:hover { background: #1557b0; }
+
+    .footer { text-align: center; font-size: 10px; color: #9aa0a6; margin-top: 8px; }
+  </style>
+</head>
+<body>
+
+  <!-- Popup -->
+  <div class="popup-overlay" id="popupOverlay">
+    <div class="popup-box">
+      <div class="popup-icon"  id="popupIcon">✅</div>
+      <div class="popup-title" id="popupTitle">Done!</div>
+      <div class="popup-msg"   id="popupMsg"></div>
+      <div class="popup-stats" id="popupStats"></div>
+      <button class="popup-ok" onclick="closePopup()">OK</button>
+    </div>
+  </div>
+
+  <div class="header">
+    <div class="mode-badge">Weekly Handoff</div>
+    <h2>🐨 Audit Toolkit</h2>
+    <p>Paste your destination folder link below</p>
+  </div>
+
+  <div class="input-box">
+    <label>📂 Destination Folder Link</label>
+    <textarea id="folderUrl" placeholder="https://drive.google.com/drive/folders/..."></textarea>
+    <div class="hint">Files will be copied INTO this folder.</div>
+  </div>
+
+  <div class="source-info">
+    <strong>🔒 Permanent Source (fixed — Weekly)</strong>
+    <?= sourceText ?>
+  </div>
+
+  <button class="btn btn-purple" id="handoffBtn" onclick="startHandoff()">
+    <span class="btn-spinner" id="handoffSpinner"></span>
+    <span id="handoffBtnText">🚀 Weekly Handoff</span>
+  </button>
+
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-header">
+      <div class="progress-label">Processing handoff...</div>
+      <div class="progress-pct" id="progressPct">0%</div>
+    </div>
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill"></div></div>
+    <div class="progress-status" id="progressStatus">Starting...</div>
+  </div>
+
+  <button class="btn btn-clear" onclick="clearAll()">🗑 Clear All</button>
+
+  <div class="result-box" id="resultBox">
+    <div class="result-title">⚡ Copy Results</div>
+    <div class="stats">
+      <div class="stat stat-green" ><div class="stat-num" id="countCopied">0</div><div class="stat-label">Copied</div></div>
+      <div class="stat stat-yellow"><div class="stat-num" id="countSkippedSlides">0</div><div class="stat-label">Skipped</div></div>
+      <div class="stat stat-red"   ><div class="stat-num" id="countGenErr">0</div><div class="stat-label">Errors</div></div>
+    </div>
+    <div style="margin-top:12px;">
+      <div class="result-title">🚀 Rename Results</div>
+      <div class="stats">
+        <div class="stat stat-green" ><div class="stat-num" id="countRenamed">0</div><div class="stat-label">Renamed</div></div>
+        <div class="stat stat-yellow"><div class="stat-num" id="countSkipped">0</div><div class="stat-label">Skipped</div></div>
+        <div class="stat stat-red"   ><div class="stat-num" id="countError">0</div><div class="stat-label">Errors</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="url-box" id="urlBox">
+    <div class="url-box-header">
+      <div class="url-box-title">🔗 Slides URLs — Custom Order</div>
+      <button class="copy-all-btn" id="copyAllBtn" onclick="copyAllUrls()">📋 Copy All</button>
+    </div>
+    <div class="url-summary">
+      <span class="url-sum-pill url-sum-found" id="sumFound">✅ 0 Found</span>
+      <span class="url-sum-pill url-sum-miss"  id="sumMiss" >❌ 0 Missing</span>
+    </div>
+    <div class="url-list" id="urlList"></div>
+  </div>
+
+  <div class="footer">QCR Tools · Weekly Audit Manager</div>
+
+<script>
+  var allUrls  = [];
+  var sourceId = "<?= sourceId ?>";
+
+  function startHandoff() {
+    var destUrl = document.getElementById("folderUrl").value.trim();
+    if (!destUrl) { alert("⚠️ Please paste the destination folder link first!"); return; }
+    if (!confirm("Run full Weekly handoff?\n\n1. Copy files from source\n2. Rename copied files\n3. Build URL report")) return;
+
+    setLoading("handoffBtn","handoffSpinner","handoffBtnText", true, "Processing...");
+    document.getElementById("resultBox").style.display = "none";
+    document.getElementById("urlBox").style.display = "none";
+    document.getElementById("progressWrap").style.display = "block";
+
+    var fakeProgress = 0;
+    var phases = [
+      { limit: 30, label: "Copying files from source..." },
+      { limit: 55, label: "Cleaning up file names..." },
+      { limit: 80, label: "Building URL report..." },
+      { limit: 95, label: "Finalizing..." }
+    ];
+    var phaseIndex = 0;
+    setProgress(0, phases[0].label);
+
+    var fakeTimer = setInterval(function() {
+      fakeProgress = Math.min(fakeProgress + Math.random() * 6, 100);
+      if (phaseIndex < phases.length - 1 && fakeProgress >= phases[phaseIndex].limit) {
+        phaseIndex++;
+      }
+      setProgress(fakeProgress, phases[phaseIndex].label);
+    }, 400);
+
+    google.script.run
+      .withSuccessHandler(function(data) {
+        clearInterval(fakeTimer);
+        setProgress(100, "Complete!");
+        setTimeout(function() {
+          document.getElementById("progressWrap").style.display = "none";
+          setLoading("handoffBtn","handoffSpinner","handoffBtnText", false, "🚀 Weekly Handoff");
+          showFullResults(data);
+        }, 600);
+      })
+      .withFailureHandler(function(e) {
+        clearInterval(fakeTimer);
+        document.getElementById("progressWrap").style.display = "none";
+        setLoading("handoffBtn","handoffSpinner","handoffBtnText", false, "🚀 Weekly Handoff");
+        showPopup("error", "❌ Error", e.message, []);
+      })
+      .runFullHandoff(sourceId, destUrl);
+  }
+
+  function showFullResults(data) {
+    var copy   = data.copy;
+    var rename = data.rename;
+    var urls   = data.urls;
+
+    document.getElementById("countCopied").textContent        = copy.copied;
+    document.getElementById("countSkippedSlides").textContent = copy.skipped;
+    document.getElementById("countGenErr").textContent        = copy.errors;
+
+    document.getElementById("countRenamed").textContent = rename.renamed;
+    document.getElementById("countSkipped").textContent = rename.skipped;
+    document.getElementById("countError").textContent   = rename.errors;
+
+    document.getElementById("resultBox").style.display = "block";
+
+    document.getElementById("sumFound").textContent = "✅ " + urls.found + " Found";
+    document.getElementById("sumMiss").textContent  = "❌ " + urls.missing + " Missing";
+    allUrls = urls.results.map(function(r) {
+      return r.status === "found" ? r.url : "⚠️ Missing — " + r.vendor;
+    });
+    document.getElementById("urlBox").style.display = "block";
+    var list = document.getElementById("urlList");
+    list.innerHTML = "";
+    urls.results.forEach(function(item) {
+      var row = document.createElement("div");
+      row.className = "url-row " + item.status;
+      if (item.status === "found") {
+        row.innerHTML =
+          '<div class="url-num">' + item.slot + '</div>' +
+          '<div class="url-info"><div class="url-name">' + item.name + '</div>' +
+          '<span class="url-link">' + item.url + '</span></div>' +
+          '<button class="copy-one-btn" onclick="copyOne(this, \'' + item.url + '\')">Copy</button>';
+      } else {
+        row.innerHTML =
+          '<div class="url-num">' + item.slot + '</div>' +
+          '<div class="url-info"><div class="url-name">❌ ' + item.vendor + '</div>' +
+          '<span style="font-size:10px; color:#ea4335;">File not found in folder</span></div>' +
+          '<span class="not-found-tag">Missing</span>';
+      }
+      list.appendChild(row);
+    });
+
+    showPopup("success", "✅ Handoff Complete!", "Files copied, renamed, and URL report ready.",
+      [
+        { num: copy.copied,  label: "Copied",  cls: "green" },
+        { num: copy.skipped, label: "Skipped", cls: "amber" },
+        { num: copy.errors,  label: "Errors",  cls: "red"   }
+      ]
+    );
+  }
+
+  function setProgress(pct, status) {
+    pct = Math.round(pct);
+    document.getElementById("progressFill").style.width   = pct + "%";
+    document.getElementById("progressPct").textContent    = pct + "%";
+    document.getElementById("progressStatus").textContent = status;
+  }
+
+  function showPopup(type, title, msg, stats) {
+    document.getElementById("popupIcon").textContent  = type === "success" ? "✅" : "❌";
+    document.getElementById("popupTitle").textContent = title;
+    document.getElementById("popupMsg").textContent   = msg;
+    var el = document.getElementById("popupStats");
+    el.innerHTML = "";
+    stats.forEach(function(s) {
+      var d = document.createElement("div");
+      d.className = "popup-stat " + s.cls;
+      d.innerHTML = '<div class="popup-stat-num">' + s.num + '</div><div class="popup-stat-label">' + s.label + '</div>';
+      el.appendChild(d);
+    });
+    document.getElementById("popupOverlay").classList.add("show");
+  }
+
+  function closePopup() { document.getElementById("popupOverlay").classList.remove("show"); }
+
+  function copyOne(btn, url) {
+    navigator.clipboard.writeText(url).then(function() {
+      btn.textContent = "✅"; btn.classList.add("copied");
+      setTimeout(function() { btn.textContent = "Copy"; btn.classList.remove("copied"); }, 1500);
+    });
+  }
+
+  function copyAllUrls() {
+    navigator.clipboard.writeText(allUrls.join("\n")).then(function() {
+      var btn = document.getElementById("copyAllBtn");
+      btn.textContent = "✅ Copied!"; btn.classList.add("copied");
+      setTimeout(function() { btn.textContent = "📋 Copy All"; btn.classList.remove("copied"); }, 2000);
+    });
+  }
+
+  function setLoading(btnId, spinnerId, textId, loading, text) {
+    document.getElementById(btnId).disabled = loading;
+    document.getElementById(spinnerId).style.display = loading ? "block" : "none";
+    document.getElementById(textId).textContent = text;
+  }
+
+  function clearAll() {
+    document.getElementById("folderUrl").value = "";
+    document.getElementById("resultBox").style.display = "none";
+    document.getElementById("urlBox").style.display = "none";
+    document.getElementById("progressWrap").style.display = "none";
+    allUrls = [];
+  }
+</script>
+</body>
+</html>

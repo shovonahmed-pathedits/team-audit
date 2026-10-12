@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Google Sans', Arial, sans-serif; }
+    body { 
+      background: white; 
+      padding: 16px 20px;
+      margin: 0;
+      font-size: 13px; 
+      color: #202124; 
+      display: flex; 
+      flex-direction: column; 
+      justify-content: center; 
+      height: 100vh; 
+      overflow: hidden; 
+    }
+
+    .progress-wrap { 
+      background: white; 
+      width: 100%;
+    }
+    .progress-header { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      margin-bottom: 12px; 
+    }
+    .progress-label { font-size: 14px; font-weight: 600; color: #202124; }
+    .progress-pct   { font-size: 14px; font-weight: 700; color: #7c3aed; }
+    .progress-bar-bg { 
+      background: #f1f3f4; 
+      border-radius: 99px; 
+      height: 12px; 
+      overflow: hidden; 
+      margin-bottom: 12px; 
+    }
+    .progress-bar-fill { 
+      height: 100%; 
+      border-radius: 99px; 
+      width: 0%; 
+      background: linear-gradient(90deg, #7c3aed, #1a73e8); 
+      transition: width 0.4s ease; 
+    }
+    .progress-status { 
+      font-size: 12px; 
+      color: #5f6368; 
+      text-align: center; 
+      min-height: 18px; 
+    }
+
+    .done-wrap { 
+      display: none; 
+      text-align: center; 
+      animation: popIn 0.3s cubic-bezier(0.175,0.885,0.32,1.275); 
+    }
+    @keyframes popIn { 
+      from { transform: scale(0.7); opacity: 0; } 
+      to { transform: scale(1); opacity: 1; } 
+    }
+    .popup-icon  { font-size: 48px; margin-bottom: 16px; }
+    .popup-title { font-size: 18px; font-weight: 700; color: #202124; margin-bottom: 8px; }
+    .popup-msg   { font-size: 13px; color: #5f6368; line-height: 1.6; margin-bottom: 20px; }
+    .popup-ok { 
+      background: #1a73e8; 
+      color: white; 
+      border: none; 
+      border-radius: 8px; 
+      padding: 10px 32px; 
+      font-size: 13px; 
+      font-weight: 600; 
+      cursor: pointer; 
+      transition: background 0.2s; 
+    }
+    .popup-ok:hover { background: #1557b0; }
+  </style>
+</head>
+<body>
+
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-header">
+      <div class="progress-label" id="taskLabel">Initializing...</div>
+      <div class="progress-pct" id="progressPct">0%</div>
+    </div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progressFill"></div>
+    </div>
+    <div class="progress-status" id="progressStatus">Loading tasks...</div>
+  </div>
+
+  <div class="done-wrap" id="doneWrap">
+    <div class="popup-icon">✅</div>
+    <div class="popup-title">Complete!</div>
+    <div class="popup-msg" id="doneMsg">All tasks finished successfully.</div>
+    <button class="popup-ok" onclick="google.script.host.close()">Close</button>
+  </div>
+
+<script>
+  let mode = "<?= mode ?>"; // 'sort' or 'push'
+  let tasks = [];
+  let currentIndex = 0;
+
+  function init() {
+    document.getElementById("taskLabel").innerText = (mode === 'push') ? "Pushing Slides..." : "Sorting Slides...";
+    
+    // Request list of tasks from backend
+    if (mode === 'push') {
+      google.script.run.withSuccessHandler(startTasks).getPushTasks();
+    } else if (mode === 'sort') {
+      google.script.run.withSuccessHandler(startTasks).getSortTasks();
+    }
+  }
+
+  function startTasks(backendTasks) {
+    tasks = backendTasks;
+    currentIndex = 0;
+    
+    if (tasks.length === 0) {
+      showDone("No matching items found. Everything is up to date.");
+      return;
+    }
+
+    updateUI();
+    processNext();
+  }
+
+  function processNext() {
+    if (currentIndex >= tasks.length) {
+      google.script.run.withSuccessHandler(() => {
+        showDone("Successfully processed " + tasks.length + (mode === 'push' ? " vendors." : " items."));
+      }).finalizeTasks(mode);
+      return;
+    }
+
+    let task = tasks[currentIndex];
+    
+    if (mode === 'push') {
+      document.getElementById("progressStatus").innerText = "Pushing vendor: " + task.vendor;
+      google.script.run
+        .withSuccessHandler(taskSuccess)
+        .withFailureHandler(taskFailure)
+        .executePushTask(task);
+    } else if (mode === 'sort') {
+      document.getElementById("progressStatus").innerText = "Organizing slide order... please wait";
+      google.script.run
+        .withSuccessHandler(taskSuccess)
+        .withFailureHandler(taskFailure)
+        .executeSortTask(task);
+    }
+  }
+
+  function taskSuccess() {
+    currentIndex++;
+    updateUI();
+    processNext();
+  }
+
+  function taskFailure(error) {
+    console.error("Task failed: " + error);
+    // Continue despite error
+    currentIndex++;
+    updateUI();
+    processNext();
+  }
+
+  function updateUI() {
+    let pct = (tasks.length > 0) ? Math.round((currentIndex / tasks.length) * 100) : 0;
+    document.getElementById("progressFill").style.width = pct + "%";
+    document.getElementById("progressPct").innerText = pct + "%";
+  }
+
+  function showDone(msg) {
+    document.getElementById("progressWrap").style.display = "none";
+    let doneWrap = document.getElementById("doneWrap");
+    doneWrap.style.display = "block";
+    document.getElementById("doneMsg").innerText = msg;
+  }
+
+  // Start process on load
+  window.onload = init;
+</script>
+</body>
+</html>
